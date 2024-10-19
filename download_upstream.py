@@ -144,6 +144,10 @@ if __name__ == "__main__":
         help="Name of W&B project used (default datacomp)",
     )
     parser.add_argument("--incremental_mode", type=str, default="incremental")
+    parser.add_argument("--all_start_shard_id", type=int, default=-1)
+    parser.add_argument("--all_end_shard_id", type=int, default=-1)
+    parser.add_argument("--cur_start_shard_id", type=int, default=-1)
+    parser.add_argument("--cur_num_shards", type=int, default=-1)
 
     args = parser.parse_args()
 
@@ -237,6 +241,10 @@ if __name__ == "__main__":
             enable_wandb=args.enable_wandb,
             wandb_project=args.wandb_project,
             incremental_mode=args.incremental_mode,
+            all_start_shard_id=args.all_start_shard_id,
+            all_end_shard_id=args.all_end_shard_id,
+            cur_start_shard_id=args.cur_start_shard_id,
+            cur_num_shards=args.cur_num_shards,
         )
     else:
         print(f"Skipping image data download.")
