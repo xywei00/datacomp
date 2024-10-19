@@ -143,6 +143,7 @@ if __name__ == "__main__":
         default="datacomp",
         help="Name of W&B project used (default datacomp)",
     )
+    parser.add_argument("--incremental_mode", type=str, default="incremental")
 
     args = parser.parse_args()
 
@@ -235,6 +236,7 @@ if __name__ == "__main__":
             retries=args.retries,
             enable_wandb=args.enable_wandb,
             wandb_project=args.wandb_project,
+            incremental_mode=args.incremental_mode,
         )
     else:
         print(f"Skipping image data download.")
