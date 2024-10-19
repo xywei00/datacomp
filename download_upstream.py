@@ -32,7 +32,7 @@ if __name__ == "__main__":
         "--scale",
         type=str,
         required=False,
-        choices=available_scales(simple_names=True)[1:] + ["datacomp_1b"],
+        choices=available_scales(simple_names=True)[1:] + ["datacomp_1b"] + ["custom"],
         default="small",
         help="Competition scale.",
     )
