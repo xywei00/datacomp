@@ -148,6 +148,7 @@ if __name__ == "__main__":
     parser.add_argument("--all_end_shard_id", type=int, default=-1)
     parser.add_argument("--cur_start_shard_id", type=int, default=-1)
     parser.add_argument("--cur_num_shards", type=int, default=-1)
+    parser.add_argument("--caption_col", type=str, default="text")
 
     args = parser.parse_args()
 
@@ -232,7 +233,7 @@ if __name__ == "__main__":
             output_format=args.output_format,
             input_format="parquet",
             url_col="url",
-            caption_col="text",
+            caption_col=args.caption_col,
             bbox_col=bbox_col,
             save_additional_columns=["uid"],
             number_sample_per_shard=10000,
