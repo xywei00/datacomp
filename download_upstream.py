@@ -218,6 +218,9 @@ if __name__ == "__main__":
         shard_dir = args.data_dir / "shards"
         shard_dir.mkdir(parents=True, exist_ok=True)
         print(f"Downloading images to {shard_dir}")
+        if any(val > 0 for val in [args.all_start_shard_id, args.all_end_shard_id, args.cur_start_shard_id, args.cur_num_shards]):
+            print((f"Total shards range: {args.all_start_shard_id} to {args.all_end_shard_id}."
+                   f" Current job shards range: {args.cur_start_shard_id} to {args.cur_start_shard_id + args.cur_num_shards}."))
 
         bbox_col = None if args.skip_bbox_blurring else "face_bboxes"
 
