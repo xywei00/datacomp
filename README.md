@@ -196,6 +196,14 @@ We also note that some factors can make runs non-deterministic even when setting
 
 ## Evaluation
 
+### Environment for evaluation
+
+The required packages for evaluation are listed in `requirements_eval.txt`. If you have open_clip / fast_clip environment, you can either reuse the environment or create a new one. In both cases, you need to install the required packages by running:
+
+```bash
+pip install -r requirements_eval.txt
+```
+
 ### [Optional] Pre-download evaluation datasets
 
 Pre-downloading evaluation datasets is optional if you have a strong Internet connection; by default, the data will be streamed directly from Hugging Face Hub. If you wish to download the data, run the following command, replacing `$download_dir` with your desired download path:

@@ -1,0 +1,14 @@
+-f https://download.pytorch.org/whl/torch_stable.html
+numpy
+torch
+torchvision
+cloudpathlib
+huggingface_hub
+requests
+open-clip-torch==2.24.0
+clip-benchmark
+scikit-learn
+webdataset
+tqdm
+datasets
+wilds
