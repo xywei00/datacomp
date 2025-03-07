@@ -1,10 +1,7 @@
 import argparse
-import copy
 import json
 import os
-import pickle
 import re
-import shutil
 import time
 import warnings
 from pathlib import Path
@@ -17,15 +14,10 @@ from cloudpathlib import CloudPath
 from huggingface_hub import (
     CommitOperationAdd,
     HfApi,
-    Repository,
-    dataset_info,
-    delete_folder,
-    upload_file,
 )
 from requests.structures import CaseInsensitiveDict
 
 from eval_utils.main import evaluate_model
-from scale_configs import available_scales, get_scale_config
 
 warnings.filterwarnings("ignore", message="Length of IterableDataset")
 
@@ -182,16 +174,13 @@ if __name__ == "__main__":
         help="Path to output directory from training.",
     )
     parser.add_argument(
-        "--output_dir",
-        default=None,
-        help="Path to output directory to use for evaluation. If nothing is passed, use the training output dir.",
-    )
-    parser.add_argument(
         "--data_dir",
         help="(Optional) Path to directory containing downloaded evaluation datasets.",
         default=None,
     )
     parser.add_argument("--batch_size", default=64, type=int, help="Batch size.")
+    parser.add_argument("--epoch", default=-1, type=int, help="Epoch to evaluate. If < 0, will use 'epoch_latest'")
+    parser.add_argument("--arch", default="", type=str, help="Architecture of the model")
 
     # Submission flags
     parser_submit = parser.add_argument_group("submission")
@@ -256,12 +245,6 @@ if __name__ == "__main__":
     # Debug-only flags. Using any of these might invalidate your submission.
     parser_debug = parser.add_argument_group("debug-only")
     parser_debug.add_argument(
-        "--use_model",
-        type=str,
-        help='If set, manually specify a model architecture and checkpoint path ("model path")',
-        default=None,
-    )
-    parser_debug.add_argument(
         "--skip_hf",
         help="If true,inodes skip uploading files to HF Hub",
         action="store_true",
@@ -283,20 +266,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     args.train_output_dir = Path(args.train_output_dir)
-    if args.output_dir is None:
-        args.output_dir = args.train_output_dir
-    args.output_dir = Path(args.output_dir)
+    if not (args.train_output_dir / "eval_results").exists():
+        Path.mkdir((args.train_output_dir / "eval_results"), parents=True, exist_ok=True)
 
-    if args.use_model is not None:
-        args.train_output_dir = args.output_dir
-        # Generate barebones info.pkl
-        model_arch, model_checkpoint = args.use_model.split(maxsplit=1)
-        Path.mkdir(args.output_dir, parents=True, exist_ok=True)
-        with open(args.train_output_dir / "info.pkl", "wb") as f:
-            pickle.dump(
-                {"scale_config": {"model": model_arch}, "checkpoint": model_checkpoint},
-                f,
-            )
+    if args.epoch >= 0:
+        prefix = f"epoch_{args.epoch}_"
+    else:
+        prefix = ""
 
     if args.submit:
         assert (
@@ -316,10 +292,13 @@ if __name__ == "__main__":
         ), "Please specify your huggingface repo name with --hf_repo_name for a valid submission."
 
     # Read training information
-    train_info_filename = args.train_output_dir / "info.pkl"
-    train_info = pickle.load(open(train_info_filename, "rb"))
+    if args.epoch >= 0:
+        checkpoint_path = args.train_output_dir / "checkpoints" / f"epoch_{args.epoch}.pt"
+    else:
+        checkpoint_path = args.train_output_dir / "checkpoints" / "epoch_latest.pt"
+    train_info = {"scale_config": {"model": args.arch}, "checkpoint": checkpoint_path}
 
-    results_filename = args.output_dir / "eval_results.jsonl"
+    results_filename = args.train_output_dir / "eval_results" / f"{prefix}eval_results.jsonl"
 
     # Get list of datasets
     with open(os.path.join(os.path.dirname(__file__), "tasklist.yml")) as f:
@@ -327,29 +306,15 @@ if __name__ == "__main__":
 
     # Check for cached results
     results = {}
-    cached_train_info_filename = args.output_dir / "info.pkl"
-    if args.output_dir.exists() and cached_train_info_filename.exists():
-        # If the output directory already exists, the training information should match.
-        cached_train_info = pickle.load(open(cached_train_info_filename, "rb"))
-        error_message = (
-            "Error: output directory exists, but the training configs do not match. "
-            "If you are re-using an output directory for evals, please be sure that "
-            "the training output directory is consistent."
-        )
-        assert cached_train_info == train_info, error_message
-
-        # Read existing results
-        if results_filename.exists():
-            with open(results_filename, "r") as f:
-                lines = [json.loads(s) for s in f.readlines()]
-                for line in lines:
-                    if line["key"] not in tasks:
-                        continue
-                    results[line["dataset"]] = line
-            print(f"Found {len(results)} eval result(s) in {results_filename}.")
-    else:
-        Path.mkdir(args.output_dir, parents=True, exist_ok=True)
-        pickle.dump(train_info, open(cached_train_info_filename, "wb"))
+    # Read existing results
+    if results_filename.exists():
+        with open(results_filename, "r") as f:
+            lines = [json.loads(s) for s in f.readlines()]
+            for line in lines:
+                if line["key"] not in tasks:
+                    continue
+                results[line["dataset"]] = line
+        print(f"Found {len(results)} eval result(s) in {results_filename}.")
 
     train_checkpoint = Path(train_info["checkpoint"])
     try:

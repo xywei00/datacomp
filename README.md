@@ -208,7 +208,7 @@ pip install -r requirements_eval.txt
 
 Pre-downloading evaluation datasets is optional if you have a strong Internet connection; by default, the data will be streamed directly from Hugging Face Hub. If you wish to download the data, run the following command, replacing `$download_dir` with your desired download path:
 
-```
+```bash
 python download_evalsets.py $download_dir
 ```
 
@@ -216,12 +216,15 @@ python download_evalsets.py $download_dir
 
 To evaluate, run the following command:
 
-```
-python evaluate.py  --train_output_dir $train_output_dir/$exp_name
-```
+```bash
+# train_output_dir should be the one containing 'checkpoints', 'out.log', etc.
+train_output_dir='/dir/to/output'
+data_dir='/dir/to/evaluation/data'
+epoch=1
+arch='ViT-B-16'
 
-If you have already donwloaded the datasets, you can use the flag `--data_dir` to point the code to the path where the data is stored.
-By default, the evaluation script outputs to the same directory as `$train_output_dir`. This can be changed with the flag `--output_dir` on the evaluation script.
+python evaluate.py --train_output_dir "${train_output_dir}" --data_dir "${data_dir}" --epoch "${epoch}" --arch "${arch}"
+```
 
 **Note:** This will not submit to our leaderboard unless you pass the `--submit` flag.
 
