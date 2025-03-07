@@ -5,7 +5,7 @@ torchvision
 cloudpathlib
 huggingface_hub
 requests
-open-clip-torch==2.24.0
+open-clip-torch==2.26.1
 clip-benchmark
 scikit-learn
 webdataset
