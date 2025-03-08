@@ -326,7 +326,7 @@ if __name__ == "__main__":
         exists = Path(train_info["checkpoint"]).exists()
     except:
         exists = False
-    if not exists and args.use_model is None:
+    if not exists:
         print(
             "Warning, did not find or could not read checkpoint at",
             train_info["checkpoint"],
