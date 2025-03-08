@@ -220,10 +220,15 @@ To evaluate, run the following command:
 # train_output_dir should be the one containing 'checkpoints', 'out.log', etc.
 train_output_dir='/dir/to/output'
 data_dir='/dir/to/evaluation/data'
-epoch=1
 arch='ViT-B-16'
 
+# Epoch
+epoch=1
 python evaluate.py --train_output_dir "${train_output_dir}" --data_dir "${data_dir}" --epoch "${epoch}" --arch "${arch}"
+
+# Iteration
+iter=10000
+python evaluate.py --train_output_dir "${train_output_dir}" --data_dir "${data_dir}" --iter "${iter}" --arch "${arch}"
 ```
 
 **Note:** This will not submit to our leaderboard unless you pass the `--submit` flag.

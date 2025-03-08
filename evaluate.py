@@ -180,6 +180,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--batch_size", default=64, type=int, help="Batch size.")
     parser.add_argument("--epoch", default=-1, type=int, help="Epoch to evaluate. If < 0, will use 'epoch_latest'")
+    parser.add_argument("--iter", default=-1, type=int, help="Iteration to evaluate. If < 0, will use 'epoch_latest'")
     parser.add_argument("--arch", default="", type=str, help="Architecture of the model")
 
     # Submission flags
@@ -270,7 +271,11 @@ if __name__ == "__main__":
         Path.mkdir((args.train_output_dir / "eval_results"), parents=True, exist_ok=True)
 
     if args.epoch >= 0:
+        ckpt_name = f"epoch_{args.epoch}.pt"
         prefix = f"epoch_{args.epoch}_"
+    elif args.iter >= 0:
+        ckpt_name = f"iter_{args.iter}.pt"
+        prefix = f"iter_{args.iter}_"
     else:
         prefix = ""
 
@@ -292,8 +297,8 @@ if __name__ == "__main__":
         ), "Please specify your huggingface repo name with --hf_repo_name for a valid submission."
 
     # Read training information
-    if args.epoch >= 0:
-        checkpoint_path = args.train_output_dir / "checkpoints" / f"epoch_{args.epoch}.pt"
+    if args.epoch >= 0 or args.iter >= 0:
+        checkpoint_path = args.train_output_dir / "checkpoints" / ckpt_name
     else:
         checkpoint_path = args.train_output_dir / "checkpoints" / "epoch_latest.pt"
     train_info = {"scale_config": {"model": args.arch}, "checkpoint": checkpoint_path}
