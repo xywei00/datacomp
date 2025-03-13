@@ -301,6 +301,12 @@ if __name__ == "__main__":
         checkpoint_path = args.train_output_dir / "checkpoints" / ckpt_name
     else:
         checkpoint_path = args.train_output_dir / "checkpoints" / "epoch_latest.pt"
+        try:
+            import torch
+            data = torch.load(checkpoint_path, map_location="cpu")
+            prefix = f"epoch_{data['epoch']}_"
+        except:
+            pass
     train_info = {"scale_config": {"model": args.arch}, "checkpoint": checkpoint_path}
 
     results_filename = args.train_output_dir / "eval_results" / f"{prefix}eval_results.jsonl"
