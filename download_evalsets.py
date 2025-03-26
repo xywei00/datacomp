@@ -22,7 +22,7 @@ def wget(src, dst, verbose=False):
 def download_datasets(data_dir):
     local_urls = []
     # Get list of datasets
-    with open("tasklist.yml") as f:
+    with open(os.path.join(os.path.dirname(__file__), "tasklist.yml")) as f:
         tasks = yaml.safe_load(f)
     for task, task_info in tasks.items():
         task_name = task_info.get("name", task)
